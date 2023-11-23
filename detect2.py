@@ -215,7 +215,7 @@ def run(
             GPIO.output(pin_out, GPIO.LOW)
             print("a")
 
-        LOGGER.info(f"{s}{'' if len(det) else '(no detections!!), '}{dt[1].dt * 1E3:.1f}ms")
+        LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
 
     # Print results
     t = tuple(x.t / seen * 1E3 for x in dt)  # speeds per image
