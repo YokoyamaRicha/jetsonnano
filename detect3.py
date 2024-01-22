@@ -54,6 +54,15 @@ from utils.general import (LOGGER, Profile, check_file, check_img_size, check_im
                            increment_path, non_max_suppression, print_args, scale_boxes, strip_optimizer, xyxy2xywh)
 from utils.torch_utils import select_device, smart_inference_mode
 
+def damage(det):
+    while True:
+        if len(det):
+            GPIO.output(pin_out, GPIO.HIGH)
+            time.sleep(0.00001)
+            GPIO.output(pin_out, GPIO.LOW)
+            print("a")
+        return a
+    
 
 @smart_inference_mode()
 def run(
