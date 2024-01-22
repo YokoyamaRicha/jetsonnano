@@ -59,8 +59,10 @@ def damage(det):
         if len(det):
             GPIO.output(pin_out, GPIO.HIGH)
             time.sleep(0.00001)
+            a=1
             GPIO.output(pin_out, GPIO.LOW)
-            print("a")
+        else:
+            a=0
         return a
     
 
