@@ -54,16 +54,6 @@ from utils.general import (LOGGER, Profile, check_file, check_img_size, check_im
                            increment_path, non_max_suppression, print_args, scale_boxes, strip_optimizer, xyxy2xywh)
 from utils.torch_utils import select_device, smart_inference_mode
 
-def damage(det):
-    while True:
-        if len(det):
-            GPIO.output(pin_out, GPIO.HIGH)
-            time.sleep(0.00001)
-            a=1
-            GPIO.output(pin_out, GPIO.LOW)
-        else:
-            a=0
-        return a
     
 
 @smart_inference_mode()
@@ -225,6 +215,7 @@ def run(
             time.sleep(0.1)
             GPIO.output(pin_out, GPIO.LOW)
             print("a")
+            det=[]
 
         LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
 
