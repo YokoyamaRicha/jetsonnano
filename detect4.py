@@ -36,10 +36,10 @@ import sys
 from pathlib import Path
 import Jetson.GPIO as GPIO
 import time
+import threading
 
 import torch
 
-pin_out = 7
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -55,6 +55,21 @@ from utils.general import (LOGGER, Profile, check_file, check_img_size, check_im
                            increment_path, non_max_suppression, print_args, scale_boxes, strip_optimizer, xyxy2xywh)
 from utils.torch_utils import select_device, smart_inference_mode
 
+def control_gpio_pin():
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(7, GPIO.OUT)
+    
+    # GPIOをHIGHにする
+    GPIO.output(7, GPIO.HIGH)
+    
+    # 0.1秒待つ
+    time.sleep(0.1)
+    
+    # GPIOをLOWに戻す
+    GPIO.output(7, GPIO.LOW)
+    
+    # GPIOの設定を解除
+    GPIO.cleanup()
 
 @smart_inference_mode()
 def run(
@@ -211,10 +226,8 @@ def run(
 
         # Print time (inference-only)
         if len(det):
-            GPIO.output(pin_out, GPIO.HIGH)
-            time.sleep(0.1)
-            GPIO.output(pin_out, GPIO.LOW)
-            print("a")
+            gpio_thread = threading.Thread(target=control_gpio_pin)
+            gpio_thread.start()
 
         LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
 
@@ -269,9 +282,6 @@ def main(opt):
 
 
 if __name__ == '__main__':
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(pin_out, GPIO.OUT)
 
-    GPIO.output(pin_out, GPIO.LOW)
     opt = parse_opt()
     main(opt)
