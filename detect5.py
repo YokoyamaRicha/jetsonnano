@@ -158,9 +158,7 @@ def run(
             if len(det):
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round()
-                GPIO.output(pin_out, GPIO.HIGH)
-                time.sleep(0.1)
-                GPIO.output(pin_out, GPIO.LOW)
+
 
                 # Print results
                 for c in det[:, 5].unique():
@@ -212,6 +210,10 @@ def run(
                     vid_writer[i].write(im0)
 
         # Print time (inference-only)
+        if len(det):
+            GPIO.output(pin_out, GPIO.HIGH)
+            time.sleep(0.1)
+            GPIO.output(pin_out, GPIO.LOW)
       
             
 
