@@ -39,7 +39,7 @@ import time
 import threading
 
 import torch
-
+object_detected = False
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -59,17 +59,21 @@ def control_gpio_pin():
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(7, GPIO.OUT)
     
-    # GPIOをHIGHにする
-    GPIO.output(7, GPIO.HIGH)
-    
-    # 0.1秒待つ
-    time.sleep(0.1)
-    
-    # GPIOをLOWに戻す
-    GPIO.output(7, GPIO.LOW)
-    
-    # GPIOの設定を解除
-    GPIO.cleanup()
+    while True:
+        if object_detected:
+            # GPIOをHIGHにする
+            GPIO.output(7, GPIO.HIGH)
+            # フラグをリセットして次の検出を待機
+            time.sleep(2)  # 例: 2秒間GPIOピンをHIGHにしたままにしてからLOWにする
+            GPIO.output(7, GPIO.LOW)
+            object_detected = False
+        else:
+            # GPIOをLOWにする
+            GPIO.output(7, GPIO.LOW)
+            
+            # 少し待つ
+            time.sleep(0.1)
+
 
 @smart_inference_mode()
 def run(
@@ -101,6 +105,7 @@ def run(
         dnn=False,  # use OpenCV DNN for ONNX inference
         vid_stride=1,  # video frame-rate stride
 ):
+    global object_detected
     source = str(source)
     save_img = not nosave and not source.endswith('.txt')  # save inference images
     is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
@@ -226,8 +231,10 @@ def run(
 
         # Print time (inference-only)
         if len(det):
-            gpio_thread = threading.Thread(target=control_gpio_pin)
-            gpio_thread.start()
+            object_detected = True
+            # ここで検出された物体に対する処理を実行
+        else:
+            object_detected = False
 
         LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
 
@@ -282,6 +289,9 @@ def main(opt):
 
 
 if __name__ == '__main__':
-
-    opt = parse_opt()
-    main(opt)
+    gpio_thread = threading.Thread(target=control_gpio_pin)
+    gpio_thread.start()
+    with torch.no_grad():
+        while True:
+            opt = parse_opt()
+            main(opt)
