@@ -177,6 +177,7 @@ def run(
             imc = im0.copy() if save_crop else im0  # for save_crop
             annotator = Annotator(im0, line_width=line_thickness, example=str(names))
             if len(det):
+                count+=1
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round()
 
@@ -230,12 +231,12 @@ def run(
                     vid_writer[i].write(im0)
 
         # Print time (inference-only)
-        if len(det):
+        if inc > count:
             object_detected = True
             # ここで検出された物体に対する処理を実行
         else:
             object_detected = False
-
+        inc=count
         LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
 
     # Print results
